@@ -1,4 +1,5 @@
 this is how GUI pages look:
+
 <img width="439" height="371" alt="image" src="https://github.com/user-attachments/assets/2f64b2c1-0498-4eab-beaf-8643f1ef58be" />
 <img width="440" height="371" alt="image" src="https://github.com/user-attachments/assets/9b078edf-4601-4e77-9685-70bfa66fde49" />
 
