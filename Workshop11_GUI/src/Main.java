@@ -1,10 +1,7 @@
-import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.net.http.WebSocket;
-import java.util.Random;
-import java.util.function.Predicate;
+import javax.swing.*;
 
 public class Main {
     public static void main(String[] args) {
@@ -16,11 +13,13 @@ public class Main {
         JPanel mainPanel = new JPanel();
         JPanel bmiPanel = new JPanel();
         JPanel bmiCenterPanel = new JPanel(new GridLayout(2, 1));
+        JPanel unitOptionsPanel = new JPanel();
 
         // set layout for each panel
         startingPanel.setLayout(new BorderLayout(5, 15));
         mainPanel.setLayout(new GridLayout(5,2));
         bmiPanel.setLayout(new BorderLayout(5, 5));
+        unitOptionsPanel.setLayout(new GridLayout(6,1));
 
 
         // define a button and a label for the starting panel
@@ -38,17 +37,25 @@ public class Main {
         startingPanel.add(nextPanel, BorderLayout.SOUTH);
 
         // define required objects for the mainPanel
+        String[] unitOptions = {"kg", "cm"};
+
         JButton calculateButton = new JButton("Calculate BMI");
         JButton previousPanel = new JButton("Previous");
-        JLabel weightLabel = new JLabel("<html>Please enter your weight in Kg:<br></html> ");
+        JLabel weightLabel = new JLabel("<html>Please enter your weight in " + unitOptions[0] + ":</html> ");
         JTextField weightTextField = new JTextField(15);
-        JLabel heightLabel = new JLabel("Please enter your height in cm: ");
+        JLabel heightLabel = new JLabel("Please enter your height in " + unitOptions[1] + ": ");
         JTextField heightTextField = new JTextField(15);
         JLabel dummyLabel = new JLabel(" ");
         JLabel resultLabel = new JLabel(
                 "",
                 SwingConstants.CENTER
         );
+
+        // define buttons to change units
+        JButton kgButton = new JButton("kg");
+        JButton lbButton = new JButton("lb");
+        JButton cmButton = new JButton("cm");
+        JButton footButton = new JButton("ft");
 
         // add objects to mainPanel
         mainPanel.add(dummyLabel);
@@ -72,8 +79,17 @@ public class Main {
         bmiCenterPanel.add(resultLabel);
 
         bmiPanel.add(bmiCenterPanel, BorderLayout.CENTER);
-
         bmiPanel.add(previousPanel, BorderLayout.SOUTH);
+
+        // add objects to UnitOptionsPanel
+        unitOptionsPanel.add(kgButton);
+        unitOptionsPanel.add(lbButton);
+        unitOptionsPanel.add(cmButton);
+        unitOptionsPanel.add(footButton);
+
+        JPanel wrapper2 = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        wrapper2.add(unitOptionsPanel);
+        bmiPanel.add(wrapper2, BorderLayout.EAST);
 
         // add action listeners to each button
         nextPanel.addActionListener(
@@ -83,12 +99,24 @@ public class Main {
                 new SwitchPanelActionListener(frame, bmiPanel, startingPanel) {}
         );
         calculateButton.addActionListener(
-                new CalculateActionListener(weightTextField, heightTextField, resultLabel, bmiCenterPanel) {}
+                new CalculateActionListener(weightTextField, heightTextField, resultLabel, bmiCenterPanel, unitOptions) {}
+        );
+        footButton.addActionListener(
+                new SwitchUnitsActionListener(unitOptions, "ft", 1, heightLabel) {}
+        );
+        kgButton.addActionListener(
+                new SwitchUnitsActionListener(unitOptions, "kg", 0, weightLabel) {}
+        );
+        cmButton.addActionListener(
+                new SwitchUnitsActionListener(unitOptions, "cm", 1, heightLabel) {}
+        );
+        lbButton.addActionListener(
+                new SwitchUnitsActionListener(unitOptions, "lb", 0, weightLabel) {}
         );
 
         frame.add(startingPanel);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(400, 500);
+        frame.setSize(600, 500);
         frame.setVisible(true);
 
     }
@@ -118,20 +146,36 @@ class CalculateActionListener implements ActionListener {
     private JTextField weightTextField;
     private JTextField heightTextField;
     private double bmi;
-    JLabel resultLabel;
     JPanel bmiPanel;
+    private JLabel resultLabel;
+    private String[] unitOptions;
 
-    public CalculateActionListener(JTextField weightTextField, JTextField heightTextField, JLabel resultLabel, JPanel bmiPanel) {
+    public CalculateActionListener(JTextField weightTextField, JTextField heightTextField, JLabel resultLabel, JPanel bmiPanel, String[] units) {
         this.weightTextField = weightTextField;
         this.heightTextField = heightTextField;
         this.resultLabel = resultLabel;
         this.bmi = 0;
         this.bmiPanel = bmiPanel;
+        this.unitOptions = units;
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        bmi = Double.parseDouble(weightTextField.getText())/ Math.pow(Double.parseDouble(heightTextField.getText())/100,2);
+        double weight = 0,  height = 0;
+        if (this.unitOptions[0].equals("kg")) {
+            weight = Double.parseDouble(weightTextField.getText());
+        } else if (this.unitOptions[0].equals("lb")) {
+            weight = Double.parseDouble(weightTextField.getText()) * 0.453592;
+        }
+
+        if (this.unitOptions[1].equals("cm")) {
+            height = Double.parseDouble(heightTextField.getText());
+        }
+        else if (this.unitOptions[1].equals("ft")) {
+            height = Double.parseDouble(heightTextField.getText()) * 30.48;
+        }
+
+        bmi = weight / Math.pow(height/100,2);
 
         String bmi_text = "";
 
@@ -150,11 +194,11 @@ class CalculateActionListener implements ActionListener {
                 bmi_text = "You have a normal weight";
                 this.bmiPanel.setBackground(Color.CYAN);
                 break;
-            case 3:
+            case 4:
                 bmi_text = "You are overweight";
                 this.bmiPanel.setBackground(Color.ORANGE);
                 break;
-            case 4:
+            case 8:
                 bmi_text = "You are obese";
                 this.bmiPanel.setBackground(Color.RED);
                 break;
@@ -169,5 +213,32 @@ class CalculateActionListener implements ActionListener {
 
     double getBmi() {
         return bmi;
+    }
+}
+
+class SwitchUnitsActionListener implements ActionListener {
+    private String[] UnitOptions;
+    private String newUnit;
+    private int idx; // 0 for weight and 1 for height
+    private JLabel label2change;
+    
+
+    SwitchUnitsActionListener(String[] UnitOptions, String newUnit, int idx, JLabel label2change) {
+        this.UnitOptions = UnitOptions;
+        this.newUnit = newUnit;
+        this.idx = idx;
+        this.label2change = label2change;
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        UnitOptions[idx] = newUnit;
+
+        if (idx == 1){
+            label2change.setText("<html>Please enter your weight in " + newUnit + ":</html> ");
+        }
+        else{
+            label2change.setText("Please enter your height in " + newUnit + ": ");
+        }
     }
 }
