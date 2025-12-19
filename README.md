@@ -6,3 +6,5 @@ this is how GUI pages look:
 and this is how it looks when we apply inputs:
 
 <img width="437" height="367" alt="image" src="https://github.com/user-attachments/assets/2d5f4197-a941-4c66-abcd-6e5fab1ad721" />
+
+the page color will change according to your bmi status (obese, overweight, normal weight, underweight)
