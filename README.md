@@ -4,4 +4,5 @@ this is how GUI pages look:
 <img width="440" height="371" alt="image" src="https://github.com/user-attachments/assets/9b078edf-4601-4e77-9685-70bfa66fde49" />
 
 and this is how it looks when we apply inputs:
+
 <img width="437" height="367" alt="image" src="https://github.com/user-attachments/assets/2d5f4197-a941-4c66-abcd-6e5fab1ad721" />
